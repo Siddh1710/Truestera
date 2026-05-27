@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trustera Consulting - HR & Admin Automation Solutions</title>
+  <meta name="description" content="Simplify and automate your HR operations, salary calculation, attendance tracking, and employee portals with custom Google Sheet and AI integrations.">
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Decorative Blurs -->
+  <div class="blur-glow sphere-1"></div>
+  <div class="blur-glow sphere-2"></div>
+  
+  <!-- Header / Navigation -->
+  <header class="glass-nav">
+    <div class="nav-container">
+      <div class="logo-area">
+        <img src="https://image2url.com/r2/default/images/1773419040232-4c88d29d-63ee-478c-b0ef-67b8d3ab79f5.png" alt="Trustera Consulting Logo" class="brand-logo-mini">
+        <span class="brand-text">Trustera</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#hero" class="active">Home</a>
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#contact">Contact</a>
+        <button class="btn-admin-nav" onclick="toggleAdminView()"><i class="fas fa-lock"></i> Admin Portal</button>
+      </nav>
+      <button class="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <main id="app">
+    
+    <!-- ================= PUBLIC VIEW ================= -->
+    <div id="public-view">
+      
+      <!-- Hero Section -->
+      <section id="hero" class="hero-section">
+        <div class="hero-container">
+          <div class="hero-content">
+            <div class="logo-box">
+              <img src="https://image2url.com/r2/default/images/1773419040232-4c88d29d-63ee-478c-b0ef-67b8d3ab79f5.png" alt="Trustera Consulting Logo" class="main-logo animate-float">
+            </div>
+            <h1 class="text-glow animate-fade-in-up">Trustera Consulting</h1>
+            <p class="hero-subtitle animate-fade-in-up-delay-1">Transform your HR & Admin workflows with custom AI-driven automation</p>
+            <p class="hero-description animate-fade-in-up-delay-2">We build tailor-made automation utilities leveraging Google Sheets, Apps Script, and AI tools to save your business hundreds of administrative hours.</p>
+            <div class="cta-group animate-fade-in-up-delay-3">
+              <button class="btn-primary ripple" onclick="openBookingModal()"><i class="fas fa-calendar-check"></i> Book a Service</button>
+              <a href="#services" class="btn-secondary"><i class="fas fa-compass"></i> Explore Solutions</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Welcome / Introduction Section -->
+      <section id="about" class="about-section scroll-section">
+        <div class="section-container">
+          <div class="glass-card about-card">
+            <span class="section-badge">Who We Are</span>
+            <h2>Smart HR Solutions for Modern Businesses</h2>
+            <div class="grid-2">
+              <div class="about-text-content">
+                <p>At <strong>Trustera Consulting</strong>, we bridge the gap between complex enterprise operations and simple, cost-effective automation. We help businesses simplify and streamline their HR tasks without expensive subscription software.</p>
+                <p>Our custom-built toolsets eliminate repetitive manual work, increase employee data security, and minimize calculation mistakes in payroll and attendance management.</p>
+                <p class="highlight-text">No bloated software. No recurring monthly fees. Just pure, customized automation built straight into systems you already use like Google Sheets.</p>
+              </div>
+              <div class="about-features">
+                <div class="feature-item">
+                  <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                  <div>
+                    <h4>Immediate ROI</h4>
+                    <p>Cut admin processing times by up to 80% starting from week one.</p>
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                  <div>
+                    <h4>Zero Monthly Subscriptions</h4>
+                    <p>Payload code runs on your own secure cloud instance with no hosting fees.</p>
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <div class="feature-icon"><i class="fas fa-cog"></i></div>
+                  <div>
+                    <h4>100% Customized</h4>
+                    <p>Tailored forms, sheets, portals, and reports modeled precisely to your existing operations.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Services Grid Section -->
+      <section id="services" class="services-section scroll-section">
+        <div class="section-container">
+          <div class="section-header">
+            <span class="section-badge">Catalog</span>
+            <h2 class="section-title">Our Automation Services</h2>
+            <p class="section-subtitle">Select any specialized automation container below to start customization</p>
+          </div>
+          
+          <div class="services-grid" id="services-container">
+            <!-- Services populated dynamically via JS, template placeholders used below for SEO & fallback -->
+            <div class="service-card glass-card" onclick="openBookingModal('Salary Automation')">
+              <div class="card-glow"></div>
+              <div class="service-icon"><i class="fas fa-calculator"></i></div>
+              <h3>Salary Automation</h3>
+              <p>Automate salary calculations, custom tax deductions, and auto-generated payslip emails directly to employees.</p>
+              <div class="service-price">₹500 - ₹1000</div>
+              <span class="service-action">Customize Solution <i class="fas fa-arrow-right"></i></span>
+            </div>
+            
+            <div class="service-card glass-card" onclick="openBookingModal('Attendance Automation')">
+              <div class="card-glow"></div>
+              <div class="service-icon"><i class="fas fa-clock"></i></div>
+              <h3>Attendance Automation</h3>
+              <p>Track shifts, custom leaves, and overtime hours with visual dashboards and real-time punch logs.</p>
+              <div class="service-price">₹500 - ₹1000</div>
+              <span class="service-action">Customize Solution <i class="fas fa-arrow-right"></i></span>
+            </div>
+            
+            <div class="service-card glass-card" onclick="openBookingModal('Recruitment Tracker')">
+              <div class="card-glow"></div>
+              <div class="service-icon"><i class="fas fa-users-cog"></i></div>
+              <h3>Recruitment Tracker</h3>
+              <p>Manage job applications, schedule pipeline stages, and automate HR rejection/offer email responses.</p>
+              <div class="service-price">₹500 - ₹800</div>
+              <span class="service-action">Customize Solution <i class="fas fa-arrow-right"></i></span>
+            </div>
+
+            <div class="service-card glass-card" onclick="openBookingModal('Policies Making')">
+              <div class="card-glow"></div>
+              <div class="service-icon"><i class="fas fa-file-signature"></i></div>
+              <h3>Policies Making</h3>
+              <p>Draft corporate HR policy files, compliance handbooks, and template libraries for automated staff distribution.</p>
+              <div class="service-price">₹500 - ₹600</div>
+              <span class="service-action">Customize Solution <i class="fas fa-arrow-right"></i></span>
+            </div>
+
+            <div class="service-card glass-card" onclick="openBookingModal('On-Off Boarding Automation')">
+              <div class="card-glow"></div>
+              <div class="service-icon"><i class="fas fa-user-plus"></i></div>
+              <h3>On-Off Boarding Automation</h3>
+              <p>Automate check-lists, corporate asset assignments, access credentials, and exit clearances for hires.</p>
+              <div class="service-price">₹500 - ₹1000</div>
+              <span class="service-action">Customize Solution <i class="fas fa-arrow-right"></i></span>
+            </div>
+
+            <div class="service-card glass-card" onclick="openBookingModal('Data Storage & Maintenance')">
+              <div class="card-glow"></div>
+              <div class="service-icon"><i class="fas fa-database"></i></div>
+              <h3>Data Storage & Maintenance</h3>
+              <p>Structured document hubs and database tables for archiving staff credentials and performance charts.</p>
+              <div class="service-price">₹500 - ₹1000</div>
+              <span class="service-action">Customize Solution <i class="fas fa-arrow-right"></i></span>
+            </div>
+
+            <div class="service-card glass-card span-col-2" onclick="openBookingModal('Employee Portal / Google Sheet Based Portal')">
+              <div class="card-glow"></div>
+              <div class="service-icon"><i class="fas fa-network-wired"></i></div>
+              <h3>Employee Portal / Google Sheet Based Portal</h3>
+              <p>Full employee management self-service portal built on Google Sheets and Apps Script. Allows staff to request leaves, view pay history, and submit expenses with automated HR approval routes.</p>
+              <div class="service-price">₹1000 - ₹2000</div>
+              <span class="service-action">Customize Solution <i class="fas fa-arrow-right"></i></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact Info Section -->
+      <section id="contact" class="contact-section scroll-section">
+        <div class="section-container">
+          <div class="section-header">
+            <span class="section-badge">Connect</span>
+            <h2>Let's Build Your Solution</h2>
+            <p class="section-subtitle">Reach out directly or book a service container above to start the onboarding phase</p>
+          </div>
+          
+          <div class="contact-grid">
+            <div class="contact-card glass-card">
+              <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+              <h3>Email Us</h3>
+              <p class="contact-detail">trusteraconsulanting@gmail.com</p>
+              <span class="contact-description">Send requirements for custom requests.</span>
+              <a href="mailto:trusteraconsulanting@gmail.com" class="contact-btn">Send Email</a>
+            </div>
+
+            <div class="contact-card glass-card">
+              <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
+              <h3>Call / WhatsApp</h3>
+              <p class="contact-detail">+91 9638312502</p>
+              <span class="contact-description">Direct consultation regarding implementation.</span>
+              <a href="tel:+919638312502" class="contact-btn">Call Direct</a>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+    </div>
+
+    <!-- ================= ADMIN VIEW ================= -->
+    <div id="admin-view" style="display:none;" class="admin-section">
+      <div class="section-container">
+        
+        <!-- Admin Login Panel -->
+        <div id="admin-login" class="admin-login-card glass-card">
+          <div class="admin-login-header">
+            <i class="fas fa-user-shield admin-lock-icon"></i>
+            <h2>Admin Portal</h2>
+            <p>Access client inquiries and booking statistics</p>
+          </div>
+          <form id="login-form" class="admin-form" onsubmit="handleAdminLogin(event)">
+            <div class="input-group">
+              <i class="fas fa-user input-icon"></i>
+              <input type="text" id="username" placeholder="Username" required value="Siddh">
+            </div>
+            <div class="input-group">
+              <i class="fas fa-key input-icon"></i>
+              <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <p id="login-error" class="error-msg"></p>
+            <button type="submit" class="btn-primary btn-full" id="btn-login-submit">Login Secured Portal</button>
+            <button type="button" class="btn-text-link" onclick="toggleAdminView()"><i class="fas fa-arrow-left"></i> Return to Homepage</button>
+          </form>
+        </div>
+
+        <!-- Admin Dashboard Panel -->
+        <div id="admin-dashboard" style="display:none;" class="admin-dashboard-layout">
+          
+          <div class="dashboard-header glass-card">
+            <div class="admin-profile">
+              <div class="admin-avatar"><i class="fas fa-user-tie"></i></div>
+              <div>
+                <h2>Welcome back, Siddh!</h2>
+                <p>System Administrator</p>
+              </div>
+            </div>
+            <div class="admin-actions">
+              <!-- Dynamic API URL configuration box (Important for GitHub Pages hosting) -->
+              <button class="btn-secondary btn-sm" onclick="openApiConfigModal()"><i class="fas fa-plug"></i> Setup API Link</button>
+              <button class="btn-danger btn-sm" onclick="handleAdminLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card glass-card">
+              <div class="stat-icon bg-cyan"><i class="fas fa-chart-line"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Total Visits</span>
+                <span class="stat-value" id="stat-total-visitors">0</span>
+              </div>
+            </div>
+            <div class="stat-card glass-card">
+              <div class="stat-icon bg-blue"><i class="fas fa-calendar-check"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Total Inquiries</span>
+                <span class="stat-value" id="stat-total-bookings">0</span>
+              </div>
+            </div>
+            <div class="stat-card glass-card">
+              <div class="stat-icon bg-orange"><i class="fas fa-star-of-life"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">New Bookings</span>
+                <span class="stat-value" id="stat-new-bookings">0</span>
+              </div>
+            </div>
+            <div class="stat-card glass-card">
+              <div class="stat-icon bg-green"><i class="fas fa-check-circle"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Completed</span>
+                <span class="stat-value" id="stat-completed-bookings">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Controllers -->
+          <div class="dashboard-tabs">
+            <button class="tab-btn active" onclick="switchDashboardTab('tab-bookings')"><i class="fas fa-inbox"></i> Manage Bookings</button>
+            <button class="tab-btn" onclick="switchDashboardTab('tab-visitors')"><i class="fas fa-shoe-prints"></i> Traffic Log</button>
+          </div>
+
+          <!-- Tab 1: Bookings Management -->
+          <div id="tab-bookings" class="tab-content active-content">
+            <div class="table-container glass-card">
+              <div class="table-header">
+                <h3>Customer Bookings</h3>
+                <button class="btn-refresh btn-sm" onclick="loadAdminData(true)"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+              </div>
+              <div class="scrollable-table">
+                <table id="bookings-table">
+                  <thead>
+                    <tr>
+                      <th>Received</th>
+                      <th>Client Name</th>
+                      <th>Contact Info</th>
+                      <th>Service Requested</th>
+                      <th>Client Note</th>
+                      <th>Deadline</th>
+                      <th>Status</th>
+                      <th>Update Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td colspan="8" class="loading-cell">Loading inquiries...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Visitors Logs -->
+          <div id="tab-visitors" class="tab-content">
+            <div class="table-container glass-card">
+              <div class="table-header">
+                <h3>Traffic & Analytics Log</h3>
+                <button class="btn-refresh btn-sm" onclick="loadAdminData(true)"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+              </div>
+              <div class="scrollable-table">
+                <table id="visitors-table">
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Page Target</th>
+                      <th>User Agent Browser Info</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td colspan="3" class="loading-cell">Loading visitors log...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= BOOKING MODAL ================= -->
+  <div id="booking-modal" class="modal-backdrop">
+    <div class="modal-card glass-card animate-zoom">
+      <button class="modal-close" onclick="closeBookingModal()">&times;</button>
+      <div class="modal-header">
+        <h2 id="modal-title">Book a Service</h2>
+        <p>Fill out the details below and we will customize your automation.</p>
+      </div>
+      
+      <form id="booking-form" onsubmit="submitBooking(event)" class="booking-form">
+        <!-- Hidden service selection -->
+        <input type="hidden" id="service-input">
+        
+        <div class="form-row">
+          <div class="form-group floating-label">
+            <input type="text" id="client-name" required placeholder=" ">
+            <label for="client-name">Your Full Name</label>
+            <i class="fas fa-user input-icon-modal"></i>
+          </div>
+        </div>
+
+        <div class="form-row grid-2-modal">
+          <div class="form-group floating-label">
+            <input type="tel" id="client-contact" required placeholder=" ">
+            <label for="client-contact">Contact Number</label>
+            <i class="fas fa-phone input-icon-modal"></i>
+          </div>
+          <div class="form-group floating-label">
+            <input type="email" id="client-email" required placeholder=" ">
+            <label for="client-email">Email Address</label>
+            <i class="fas fa-envelope input-icon-modal"></i>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group floating-label">
+            <textarea id="requirement-desc" required placeholder=" " rows="3"></textarea>
+            <label for="requirement-desc">Describe your business automation needs...</label>
+            <i class="fas fa-pencil-alt input-icon-modal"></i>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="static-label">Requested Completion Deadline</label>
+            <input type="date" id="target-date" required>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="btn-booking-submit">
+          <span class="btn-text">Submit Request</span>
+          <span class="btn-loading-spinner" style="display:none;"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= API CONFIGURATION MODAL ================= -->
+  <div id="api-config-modal" class="modal-backdrop">
+    <div class="modal-card glass-card animate-zoom" style="max-width: 450px;">
+      <button class="modal-close" onclick="closeApiConfigModal()">&times;</button>
+      <div class="modal-header">
+        <h2>API Link Connection</h2>
+        <p>Link this site to your Google Apps Script Web App for databases.</p>
+      </div>
+      <div class="api-setup-body">
+        <p class="info-alert"><i class="fas fa-info-circle"></i> Connect to your Google Spreadsheet database by pasting your Web App Deployment URL below.</p>
+        <div class="form-group">
+          <label for="api-url-input">Google Web App URL</label>
+          <input type="text" id="api-url-input" class="classic-input" placeholder="https://script.google.com/macros/s/.../exec">
+        </div>
+        <button class="btn-primary btn-full mt-10" onclick="saveApiUrl()"><i class="fas fa-save"></i> Save & Connect Database</button>
+        <button class="btn-text-link btn-full mt-10" onclick="resetApiUrlToMock()"><i class="fas fa-undo"></i> Reset to Demo/Mock Mode</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer-area">
+    <div class="footer-container">
+      <p>&copy; 2026 Trustera Consulting. All rights reserved. Smart, cost-effective HR tools.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
