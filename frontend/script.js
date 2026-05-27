@@ -350,7 +350,7 @@ function submitBooking(event) {
                           `*Target Deadline:* ${bookingData.endDate || 'Not specified'}`;
       
       const encodedMsg = encodeURIComponent(whatsappMsg);
-      const whatsappUrl = `https://api.whatsapp.net/send?phone=919638312502&text=${encodedMsg}`;
+      const whatsappUrl = `https://wa.me/919638312502?text=${encodedMsg}`;
       
       // Open WhatsApp link in a new tab
       window.open(whatsappUrl, '_blank');
