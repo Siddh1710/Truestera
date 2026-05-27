@@ -337,8 +337,23 @@ function submitBooking(event) {
     spinnerSpan.style.display = 'none';
     
     if (response.success) {
-      showNotification("Inquiry Submitted Successfully! We will review and reach out shortly.", "success");
+      showNotification("Inquiry Saved! Redirecting to WhatsApp to send message...", "success");
       closeBookingModal();
+      
+      // WhatsApp message formatting
+      const whatsappMsg = `Hello Trustera Consulting, I would like to book a service:\n\n` +
+                          `*Name:* ${bookingData.name}\n` +
+                          `*Contact:* ${bookingData.contact}\n` +
+                          `*Email:* ${bookingData.email}\n` +
+                          `*Service:* ${bookingData.service}\n` +
+                          `*Description:* ${bookingData.description}\n` +
+                          `*Target Deadline:* ${bookingData.endDate || 'Not specified'}`;
+      
+      const encodedMsg = encodeURIComponent(whatsappMsg);
+      const whatsappUrl = `https://api.whatsapp.net/send?phone=919638312502&text=${encodedMsg}`;
+      
+      // Open WhatsApp link in a new tab
+      window.open(whatsappUrl, '_blank');
     } else {
       showNotification(`Submission error: ${response.error || "Please try again"}`, "error");
     }

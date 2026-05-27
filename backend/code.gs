@@ -210,6 +210,24 @@ function addBooking(booking) {
     ""
   ]);
 
+  // Send a free email alert to trusteraconsulanting@gmail.com
+  try {
+    const subject = `New Trustera Inquiry: ${booking.service || 'General'} from ${booking.name || 'Client'}`;
+    const body = `Hello Siddh,\n\nYou have received a new service inquiry on Trustera Consulting:\n\n` +
+                 `Client Name: ${booking.name || 'N/A'}\n` +
+                 `Contact Number: ${booking.contact || 'N/A'}\n` +
+                 `Email Address: ${booking.email || 'N/A'}\n` +
+                 `Service Requested: ${booking.service || 'N/A'}\n` +
+                 `Requirements: ${booking.description || 'N/A'}\n` +
+                 `Deadline Timeline: ${booking.endDate || 'Not specified'}\n\n` +
+                 `This record has been successfully logged into your Google Sheet and Admin Portal.\n\n` +
+                 `Best regards,\nTrustera Automation Engine`;
+    
+    MailApp.sendEmail("trusteraconsulanting@gmail.com", subject, body);
+  } catch (error) {
+    Logger.log("Failed to send email alert: " + error.toString());
+  }
+
   return true;
 }
 
