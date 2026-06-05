@@ -186,7 +186,7 @@ function getBookings() {
       obj.Timestamp = obj.Timestamp.toISOString();
     }
     return obj;
-  });
+  }).filter(obj => obj.Name && obj.Name.toString().trim() !== "");
 }
 
 function addBooking(booking) {

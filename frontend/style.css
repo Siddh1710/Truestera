@@ -1398,6 +1398,41 @@ tr:hover td {
   font-size: 0.9rem;
 }
 
+/* ==================== DASHBOARD CHARTS STYLING ==================== */
+.dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.chart-card {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chart-card h3.chart-title {
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  border-left: 3px solid var(--accent-blue);
+  padding-left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.chart-container {
+  position: relative;
+  height: 280px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* ==================== RESPONSIVE DESIGN ==================== */
 
 @media (max-width: 992px) {
@@ -1410,6 +1445,9 @@ tr:hover td {
   }
   .span-col-2 {
     grid-column: span 1;
+  }
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
   }
 }
 

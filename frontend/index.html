@@ -288,6 +288,22 @@
             </div>
           </div>
 
+          <!-- Dashboard Charts Row -->
+          <div class="dashboard-charts-grid">
+            <div class="chart-card glass-card">
+              <h3 class="chart-title"><i class="fas fa-pie-chart"></i> Inquiry Status Distribution</h3>
+              <div class="chart-container">
+                <canvas id="statusChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card glass-card">
+              <h3 class="chart-title"><i class="fas fa-bar-chart"></i> Popular Services Demand</h3>
+              <div class="chart-container">
+                <canvas id="servicesChart"></canvas>
+              </div>
+            </div>
+          </div>
+
           <!-- Tab Controllers -->
           <div class="dashboard-tabs">
             <button class="tab-btn active" onclick="switchDashboardTab('tab-bookings')"><i class="fas fa-inbox"></i> Manage Bookings</button>
@@ -443,6 +459,7 @@
   </footer>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

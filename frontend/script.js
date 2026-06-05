@@ -462,30 +462,34 @@ function loadAdminData(forceRefresh = false) {
     showNotification("Syncing spreadsheet records...", "info");
   }
   
-  // 1. Fetch dashboard numerical summaries
-  callApi('getDashboardSummary', {}, function(response) {
-    if (response.success && response.data) {
-      const summary = response.data;
-      document.getElementById('stat-total-visitors').textContent = summary.totalVisitors;
-      document.getElementById('stat-total-bookings').textContent = summary.totalBookings;
-      document.getElementById('stat-new-bookings').textContent = summary.newBookings;
-      document.getElementById('stat-completed-bookings').textContent = summary.completedBookings;
-    }
-  });
-
-  // 2. Fetch inquiry log and draw table
+  // 1. Fetch inquiry log, draw table, and calculate metrics dynamically
   callApi('getBookings', {}, function(response) {
     if (response.success && response.data) {
-      state.bookings = response.data;
+      // Filter out empty/dummy entries (where Name is empty)
+      state.bookings = response.data.filter(row => row.Name && row.Name.toString().trim() !== '');
       renderBookingsTable(state.bookings);
+      
+      // Calculate stats dynamically on client side to filter out dummy spreadsheet entries!
+      const totalBookings = state.bookings.length;
+      const newBookings = state.bookings.filter(b => b.Status === 'New').length;
+      const progressBookings = state.bookings.filter(b => b.Status === 'In Progress' || b.Status === 'Contacted').length;
+      const completedBookings = state.bookings.filter(b => b.Status === 'Completed').length;
+      
+      document.getElementById('stat-total-bookings').textContent = totalBookings;
+      document.getElementById('stat-new-bookings').textContent = newBookings;
+      document.getElementById('stat-completed-bookings').textContent = completedBookings;
+      
+      // Render Charts with valid bookings
+      renderDashboardCharts(state.bookings);
     }
   });
 
-  // 3. Fetch visitor logs and draw table
+  // 2. Fetch visitor logs and draw table
   callApi('getVisitors', {}, function(response) {
     if (response.success && response.data) {
       state.visitors = response.data;
       renderVisitorsTable(state.visitors);
+      document.getElementById('stat-total-visitors').textContent = state.visitors.length;
     }
   });
 }
@@ -512,13 +516,16 @@ function renderBookingsTable(data) {
   const tbody = document.querySelector('#bookings-table tbody');
   tbody.innerHTML = '';
   
-  if (data.length === 0) {
+  // Filter out empty dummy bookings (where Name is empty)
+  const validData = data.filter(row => row.Name && row.Name.toString().trim() !== '');
+  
+  if (validData.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" class="loading-cell">No inquiries found in database.</td></tr>`;
     return;
   }
 
   // Sort descending by timestamp (newest first)
-  const sorted = [...data].sort((a,b) => new Date(b.Timestamp) - new Date(a.Timestamp));
+  const sorted = [...validData].sort((a,b) => new Date(b.Timestamp) - new Date(a.Timestamp));
 
   sorted.forEach(row => {
     const tr = document.createElement('tr');
@@ -713,4 +720,125 @@ function escapeHtml(text) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+// ==================== DASHBOARD CHARTS RENDER FUNCTIONS ====================
+let statusChartInstance = null;
+let servicesChartInstance = null;
+
+function renderDashboardCharts(bookings) {
+  // 1. Calculate status distribution
+  const newCount = bookings.filter(b => b.Status === 'New').length;
+  const contactedCount = bookings.filter(b => b.Status === 'Contacted' || b.Status === 'In Progress').length;
+  const completedCount = bookings.filter(b => b.Status === 'Completed').length;
+
+  if (statusChartInstance) {
+    statusChartInstance.destroy();
+  }
+
+  const statusCanvas = document.getElementById('statusChart');
+  if (statusCanvas) {
+    const statusCtx = statusCanvas.getContext('2d');
+    statusChartInstance = new Chart(statusCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['New', 'In Progress', 'Completed'],
+        datasets: [{
+          data: [newCount, contactedCount, completedCount],
+          backgroundColor: [
+            'rgba(245, 158, 11, 0.7)',  // Warning Orange
+            'rgba(6, 182, 212, 0.7)',   // Info Cyan
+            'rgba(16, 185, 129, 0.7)'   // Success Green
+          ],
+          borderColor: '#ffffff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#334155',
+              font: {
+                family: 'Outfit',
+                weight: '600',
+                size: 11
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // 2. Calculate service popularity
+  const serviceCounts = {};
+  bookings.forEach(b => {
+    const serviceName = b.Service || 'Other';
+    // Shorten service name for visual presentation on chart labels
+    const shortName = serviceName.split(' / ')[0].split(' - ')[0];
+    serviceCounts[shortName] = (serviceCounts[shortName] || 0) + 1;
+  });
+
+  const serviceLabels = Object.keys(serviceCounts);
+  const serviceData = Object.values(serviceCounts);
+
+  if (servicesChartInstance) {
+    servicesChartInstance.destroy();
+  }
+
+  const servicesCanvas = document.getElementById('servicesChart');
+  if (servicesCanvas) {
+    const servicesCtx = servicesCanvas.getContext('2d');
+    servicesChartInstance = new Chart(servicesCtx, {
+      type: 'bar',
+      data: {
+        labels: serviceLabels,
+        datasets: [{
+          label: 'Inquiries count',
+          data: serviceData,
+          backgroundColor: 'rgba(37, 99, 235, 0.6)', // Accent Blue
+          borderColor: 'rgba(37, 99, 235, 0.8)',
+          borderWidth: 1,
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#64748b',
+              font: {
+                family: 'Inter',
+                size: 10
+              }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(15, 23, 42, 0.05)'
+            },
+            ticks: {
+              stepSize: 1,
+              color: '#64748b'
+            }
+          }
+        }
+      }
+    });
+  }
 }
