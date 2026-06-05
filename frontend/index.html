@@ -452,20 +452,20 @@
         
         <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 20px 0;">
         
-        <!-- Section 2: WhatsApp Automation -->
-        <h3 style="margin-bottom: 8px; font-size: 1.1rem; color: var(--accent-cyan);"><i class="fab fa-whatsapp"></i> WhatsApp Status Reports</h3>
-        <p class="info-alert" style="font-size: 0.8rem; padding: 8px 12px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Daily reports will be sent to <strong>+91 9638312502</strong>. Register with CallMeBot to get your API Key.</p>
+        <!-- Section 2: Email Automation -->
+        <h3 style="margin-bottom: 8px; font-size: 1.1rem; color: var(--accent-cyan);"><i class="fas fa-envelope"></i> Email Status Reports</h3>
+        <p class="info-alert" style="font-size: 0.8rem; padding: 8px 12px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Daily reports will be sent automatically to the email configured below.</p>
         
         <div class="form-group" style="margin-bottom: 12px;">
-          <label for="api-whatsapp-key" style="font-size: 0.85rem; font-weight: 600; color: #4b5563;">CallMeBot API Key</label>
-          <input type="text" id="api-whatsapp-key" class="classic-input" placeholder="Enter CallMeBot API Key (e.g. 3235650)">
+          <label for="api-report-email" style="font-size: 0.85rem; font-weight: 600; color: #4b5563;">Report Email Address</label>
+          <input type="email" id="api-report-email" class="classic-input" placeholder="siddhkhatri17@gmail.com">
         </div>
         
-        <button class="btn-primary btn-full mt-10" onclick="saveWhatsAppKey()" style="background: linear-gradient(135deg, #25D366, #128C7E); border-color: rgba(37, 211, 102, 0.4); color: white;"><i class="fas fa-key"></i> Save WhatsApp Key</button>
+        <button class="btn-primary btn-full mt-10" onclick="saveReportEmail()" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-color: rgba(59, 130, 246, 0.4); color: white;"><i class="fas fa-save"></i> Save Recipient Email</button>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-          <button class="btn-secondary btn-sm" onclick="setupDailyWhatsappTrigger()" style="padding: 10px 5px; font-size: 0.78rem; text-align: center;"><i class="fas fa-calendar-alt"></i> Schedule 12:00 PM Trigger</button>
-          <button class="btn-secondary btn-sm" onclick="sendTestWhatsappReport()" style="padding: 10px 5px; font-size: 0.78rem; text-align: center;"><i class="fas fa-paper-plane"></i> Send Test Report Now</button>
+          <button class="btn-secondary btn-sm" onclick="setupDailyEmailTrigger()" style="padding: 10px 5px; font-size: 0.78rem; text-align: center;"><i class="fas fa-calendar-alt"></i> Schedule 12:00 PM Trigger</button>
+          <button class="btn-secondary btn-sm" onclick="sendTestEmailReport()" style="padding: 10px 5px; font-size: 0.78rem; text-align: center;"><i class="fas fa-paper-plane"></i> Send Test Report Now</button>
         </div>
       </div>
     </div>

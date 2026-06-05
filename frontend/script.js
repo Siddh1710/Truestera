@@ -613,9 +613,9 @@ function openApiConfigModal() {
   
   input.value = CONFIG.apiUrl;
   
-  const keyInput = document.getElementById('api-whatsapp-key');
-  if (keyInput) {
-    keyInput.value = localStorage.getItem('trustera_whatsapp_key') || '';
+  const emailInput = document.getElementById('api-report-email');
+  if (emailInput) {
+    emailInput.value = localStorage.getItem('trustera_report_email') || 'siddhkhatri17@gmail.com';
   }
   
   modal.style.display = 'flex';
@@ -849,33 +849,38 @@ function renderDashboardCharts(bookings) {
   }
 }
 
-// ================= WHATSAPP AUTOMATION CONTROLS =================
+// ================= EMAIL AUTOMATION CONTROLS =================
 
-function saveWhatsAppKey() {
-  const keyInput = document.getElementById('api-whatsapp-key');
-  const apiKey = keyInput ? keyInput.value.trim() : '';
+function saveReportEmail() {
+  const emailInput = document.getElementById('api-report-email');
+  const emailVal = emailInput ? emailInput.value.trim() : '';
   
-  localStorage.setItem('trustera_whatsapp_key', apiKey);
-  
-  if (!CONFIG.apiUrl) {
-    showNotification("Saved WhatsApp Key locally (Demo Mode).", "success");
+  if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    showNotification("Please enter a valid email address.", "error");
     return;
   }
   
-  showNotification("Saving WhatsApp key to server properties...", "info");
+  localStorage.setItem('trustera_report_email', emailVal);
   
-  callApi('setCallMeBotApiKey', { apiKey: apiKey }, function(response) {
+  if (!CONFIG.apiUrl) {
+    showNotification("Saved recipient email locally (Demo Mode).", "success");
+    return;
+  }
+  
+  showNotification("Saving email recipient to server properties...", "info");
+  
+  callApi('setReportEmail', { email: emailVal }, function(response) {
     if (response.success) {
-      showNotification("WhatsApp CallMeBot API key saved on Google server!", "success");
+      showNotification("Report recipient email saved on Google server!", "success");
     } else {
-      showNotification("Failed to save key on server: " + (response.error || "unknown error"), "error");
+      showNotification("Failed to save email on server: " + (response.error || "unknown error"), "error");
     }
   }, function(err) {
-    showNotification("Connection error saving key to server.", "error");
+    showNotification("Connection error saving email to server.", "error");
   });
 }
 
-function setupDailyWhatsappTrigger() {
+function setupDailyEmailTrigger() {
   if (!CONFIG.apiUrl) {
     showNotification("Daily trigger can only be scheduled when API is connected.", "warning");
     return;
@@ -894,17 +899,17 @@ function setupDailyWhatsappTrigger() {
   });
 }
 
-function sendTestWhatsappReport() {
+function sendTestEmailReport() {
   if (!CONFIG.apiUrl) {
-    showNotification("WhatsApp reports can only be triggered in live API mode.", "warning");
+    showNotification("Email reports can only be triggered in live API mode.", "warning");
     return;
   }
   
-  showNotification("Requesting test WhatsApp report from server...", "info");
+  showNotification("Requesting test report email from server...", "info");
   
   callApi('sendDailyReport', {}, function(response) {
     if (response.success) {
-      showNotification("Test WhatsApp report sent successfully to +91 9638312502!", "success");
+      showNotification("Test report email sent successfully!", "success");
     } else {
       showNotification("Test report failed: " + (response.error || "unknown error"), "error");
     }

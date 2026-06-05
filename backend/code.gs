@@ -8,11 +8,9 @@
 // Replace the ID below with your active Google Spreadsheet ID if needed.
 const SPREADSHEET_ID = "1podni8jkJb1oRzuk4d5wYHXIyBmpWwUsTaMASsqaxHI";
 
-// CALLMEBOT WHATSAPP CONFIGURATION
-// Your WhatsApp phone number (must include country code, e.g. +919638312502)
-const WHATSAPP_PHONE = "+919638312502";
-// Default CallMeBot API key (can also be overridden using script properties)
-const CALLMEBOT_API_KEY = "3235650";
+// EMAIL REPORT CONFIGURATION
+// Default email recipient for daily status reports
+const REPORT_EMAIL = "siddhkhatri17@gmail.com";
 
 /**
  * Serves the web application directly if hosted on Google Apps Script.
@@ -110,13 +108,13 @@ function handleApiRequest(action, params) {
         const reportResult = sendDailyReport();
         result = reportResult;
         break;
-      case 'setCallMeBotApiKey':
-        const apiKey = params.apiKey;
-        if (apiKey) {
-          PropertiesService.getScriptProperties().setProperty('CALLMEBOT_API_KEY', apiKey.trim());
+      case 'setReportEmail':
+        const email = params.email;
+        if (email) {
+          PropertiesService.getScriptProperties().setProperty('REPORT_EMAIL', email.trim());
           result = { success: true };
         } else {
-          result = { success: false, error: "API Key is required" };
+          result = { success: false, error: "Email address is required" };
         }
         break;
       default:
@@ -336,10 +334,10 @@ function getServices() {
   ];
 }
 
-// ---------- WhatsApp Daily Report Automation ----------
+// ---------- Email Daily Report Automation ----------
 
 /**
- * Sends a daily status report to the user's WhatsApp via CallMeBot API.
+ * Sends a daily status report to the configured email.
  */
 function sendDailyReport() {
   try {
@@ -416,75 +414,108 @@ function sendDailyReport() {
     // Format the date nicely for report
     const dateFormatted = Utilities.formatDate(today, "GMT+5:30", "dd MMM yyyy, hh:mm a");
     
-    // Build the WhatsApp message
-    let message = `📊 *TRUSTERA DAILY REPORT* 📊\n` +
-                  `*Date:* ${dateFormatted} (IST)\n\n` +
-                  `📈 *Today's Activity:* \n` +
-                  `• Website Visitors: ${visitorsTodayCount}\n` +
-                  `• New Inquiries: ${bookingsTodayCount}\n\n`;
-                  
+    // Get target email address
+    const emailAddress = PropertiesService.getScriptProperties().getProperty('REPORT_EMAIL') || REPORT_EMAIL;
+    
+    // Build the HTML email
+    let inquiriesHtml = "";
     if (bookingsTodayCount > 0) {
-      message += `📝 *Today's New Inquiries:* \n`;
-      bookingsToday.forEach((b, idx) => {
-        message += `${idx + 1}. *${b.name}*\n` +
-                   `   Service: ${b.service || 'N/A'}\n` +
-                   `   Contact: ${b.contact || 'N/A'}\n`;
+      inquiriesHtml += `<h2 style="font-size: 18px; color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 12px; font-family: sans-serif;">📝 Today's New Inquiries</h2>`;
+      inquiriesHtml += `<table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-family: sans-serif;">`;
+      inquiriesHtml += `<tr style="background-color: #f1f5f9; text-align: left; font-size: 12px; color: #475569;">`;
+      inquiriesHtml += `<th style="padding: 8px; border: 1px solid #cbd5e1;">Client</th>`;
+      inquiriesHtml += `<th style="padding: 8px; border: 1px solid #cbd5e1;">Service</th>`;
+      inquiriesHtml += `<th style="padding: 8px; border: 1px solid #cbd5e1;">Contact</th>`;
+      inquiriesHtml += `</tr>`;
+      
+      bookingsToday.forEach(b => {
+        inquiriesHtml += `<tr style="font-size: 13px; color: #334155;">`;
+        inquiriesHtml += `<td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold;">${escapeHtmlForGas(b.name)}</td>`;
+        inquiriesHtml += `<td style="padding: 8px; border: 1px solid #cbd5e1;"><span style="background-color: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">${escapeHtmlForGas(b.service)}</span></td>`;
+        inquiriesHtml += `<td style="padding: 8px; border: 1px solid #cbd5e1;">${escapeHtmlForGas(b.contact)}</td>`;
+        inquiriesHtml += `</tr>`;
       });
-      message += `\n`;
+      inquiriesHtml += `</table>`;
     }
     
-    message += `💼 *Overall Bookings Status:* \n` +
-               `• New: ${newCount}\n` +
-               `• In Progress: ${progressCount}\n` +
-               `• Completed: ${completedCount}\n` +
-               `• Total Database: ${totalBookings}\n\n` +
-               `Generated automatically by Trustera Backend.`;
-               
-    // Send the WhatsApp report
-    return sendWhatsAppMessage(WHATSAPP_PHONE, message);
+    const htmlBody = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #f8fafc; color: #1e293b;">
+      <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px;">
+        <h1 style="color: #2563eb; margin: 0; font-size: 24px; font-family: sans-serif;">Trustera Consulting</h1>
+        <p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px; font-family: sans-serif;">Daily Activity & Status Report</p>
+      </div>
+      
+      <div style="margin-bottom: 20px; font-family: sans-serif;">
+        <span style="font-size: 14px; background-color: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 6px; font-weight: bold;">Date: ${dateFormatted} (IST)</span>
+      </div>
+
+      <h2 style="font-size: 18px; color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 12px; font-family: sans-serif;">📈 Today's Activity</h2>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-family: sans-serif;">
+        <tr>
+          <td style="padding: 8px 0; color: #475569;">Website Visitors Today:</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #0f172a;">${visitorsTodayCount}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #475569;">New Inquiries Today:</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #2563eb;">${bookingsTodayCount}</td>
+        </tr>
+      </table>
+
+      ${inquiriesHtml}
+
+      <h2 style="font-size: 18px; color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 12px; font-family: sans-serif;">💼 Overall Database Summary</h2>
+      <table style="width: 100%; border-collapse: collapse; font-family: sans-serif;">
+        <tr>
+          <td style="padding: 8px 0; color: #475569;">New Bookings:</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #d97706;">${newCount}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #475569;">In Progress:</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #0891b2;">${progressCount}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #475569;">Completed:</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #16a34a;">${completedCount}</td>
+        </tr>
+        <tr style="border-top: 1px solid #e2e8f0; font-size: 16px;">
+          <td style="padding: 12px 0 0 0; font-weight: bold; color: #0f172a;">Total Database Inquiries:</td>
+          <td style="padding: 12px 0 0 0; text-align: right; font-weight: bold; color: #0f172a;">${totalBookings}</td>
+        </tr>
+      </table>
+      
+      <div style="margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 12px; color: #94a3b8; text-align: center; font-family: sans-serif;">
+        This is an automated status update generated by the Trustera Booking Engine.
+      </div>
+    </div>
+    `;
+
+    // Send email using MailApp
+    MailApp.sendEmail({
+      to: emailAddress,
+      subject: `📊 Trustera Consulting - Daily Status Report [${dateFormatted}]`,
+      htmlBody: htmlBody
+    });
+
+    Logger.log("Daily report email sent successfully to " + emailAddress);
+    return { success: true, message: "Daily report email sent successfully to " + emailAddress };
     
   } catch (error) {
-    Logger.log("Error sending daily report: " + error.toString());
+    Logger.log("Error sending daily report email: " + error.toString());
     return { success: false, error: error.toString() };
   }
 }
 
 /**
- * Sends a message via CallMeBot WhatsApp API.
+ * Escapes HTML characters for safety in Apps Script template injections.
  */
-function sendWhatsAppMessage(phone, message) {
-  try {
-    const apikey = PropertiesService.getScriptProperties().getProperty('CALLMEBOT_API_KEY') || CALLMEBOT_API_KEY;
-    
-    if (!apikey || apikey === "3235650" || apikey === "") {
-      Logger.log("CallMeBot API Key is default or not configured.");
-      return { success: false, error: "CallMeBot API Key not configured. Please set CALLMEBOT_API_KEY in script properties." };
-    }
-    
-    let cleanedPhone = phone.replace(/[^0-9]/g, "");
-    if (cleanedPhone.length === 10) {
-      cleanedPhone = "91" + cleanedPhone; // Default to India country code
-    }
-    
-    const url = "https://api.callmebot.com/whatsapp.php?phone=" + cleanedPhone + 
-                "&text=" + encodeURIComponent(message) + 
-                "&apikey=" + apikey;
-                
-    const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-    const responseCode = response.getResponseCode();
-    const content = response.getContentText();
-    
-    if (responseCode === 200) {
-      Logger.log("WhatsApp message API status: OK");
-      return { success: true, response: content };
-    } else {
-      Logger.log("CallMeBot error: " + content);
-      return { success: false, error: content, code: responseCode };
-    }
-  } catch (error) {
-    Logger.log("HTTP exception during WhatsApp send: " + error.toString());
-    return { success: false, error: error.toString() };
-  }
+function escapeHtmlForGas(text) {
+  if (!text) return '';
+  return text.toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 /**
