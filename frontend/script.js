@@ -466,7 +466,7 @@ function loadAdminData(forceRefresh = false) {
   callApi('getBookings', {}, function(response) {
     if (response.success && response.data) {
       // Filter out empty/dummy entries (where Name is empty)
-      state.bookings = response.data.filter(row => row.Name && row.Name.toString().trim() !== '');
+      state.bookings = response.data.filter(isValidBookingRow);
       renderBookingsTable(state.bookings);
       
       // Calculate stats dynamically on client side to filter out dummy spreadsheet entries!
@@ -516,8 +516,8 @@ function renderBookingsTable(data) {
   const tbody = document.querySelector('#bookings-table tbody');
   tbody.innerHTML = '';
   
-  // Filter out empty dummy bookings (where Name is empty)
-  const validData = data.filter(row => row.Name && row.Name.toString().trim() !== '');
+  // Filter out empty dummy bookings
+  const validData = data.filter(isValidBookingRow);
   
   if (validData.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" class="loading-cell">No inquiries found in database.</td></tr>`;
@@ -612,6 +612,12 @@ function openApiConfigModal() {
   const input = document.getElementById('api-url-input');
   
   input.value = CONFIG.apiUrl;
+  
+  const keyInput = document.getElementById('api-whatsapp-key');
+  if (keyInput) {
+    keyInput.value = localStorage.getItem('trustera_whatsapp_key') || '';
+  }
+  
   modal.style.display = 'flex';
 }
 
@@ -841,4 +847,89 @@ function renderDashboardCharts(bookings) {
       }
     });
   }
+}
+
+// ================= WHATSAPP AUTOMATION CONTROLS =================
+
+function saveWhatsAppKey() {
+  const keyInput = document.getElementById('api-whatsapp-key');
+  const apiKey = keyInput ? keyInput.value.trim() : '';
+  
+  localStorage.setItem('trustera_whatsapp_key', apiKey);
+  
+  if (!CONFIG.apiUrl) {
+    showNotification("Saved WhatsApp Key locally (Demo Mode).", "success");
+    return;
+  }
+  
+  showNotification("Saving WhatsApp key to server properties...", "info");
+  
+  callApi('setCallMeBotApiKey', { apiKey: apiKey }, function(response) {
+    if (response.success) {
+      showNotification("WhatsApp CallMeBot API key saved on Google server!", "success");
+    } else {
+      showNotification("Failed to save key on server: " + (response.error || "unknown error"), "error");
+    }
+  }, function(err) {
+    showNotification("Connection error saving key to server.", "error");
+  });
+}
+
+function setupDailyWhatsappTrigger() {
+  if (!CONFIG.apiUrl) {
+    showNotification("Daily trigger can only be scheduled when API is connected.", "warning");
+    return;
+  }
+  
+  showNotification("Scheduling daily trigger on Google server...", "info");
+  
+  callApi('setupDailyTrigger', {}, function(response) {
+    if (response.success) {
+      showNotification(response.message || "Daily 12:00 PM IST report scheduled successfully!", "success");
+    } else {
+      showNotification("Failed to schedule trigger: " + (response.error || "unknown error"), "error");
+    }
+  }, function(err) {
+    showNotification("Connection error scheduling trigger.", "error");
+  });
+}
+
+function sendTestWhatsappReport() {
+  if (!CONFIG.apiUrl) {
+    showNotification("WhatsApp reports can only be triggered in live API mode.", "warning");
+    return;
+  }
+  
+  showNotification("Requesting test WhatsApp report from server...", "info");
+  
+  callApi('sendDailyReport', {}, function(response) {
+    if (response.success) {
+      showNotification("Test WhatsApp report sent successfully to +91 9638312502!", "success");
+    } else {
+      showNotification("Test report failed: " + (response.error || "unknown error"), "error");
+    }
+  }, function(err) {
+    showNotification("Connection error sending test report.", "error");
+  });
+}
+
+/**
+ * Validates a booking row to filter out dummy/empty cells.
+ */
+function isValidBookingRow(row) {
+  if (!row.Name) return false;
+  const nameStr = row.Name.toString().trim();
+  // Must contain at least one alphanumeric character
+  if (!/[a-zA-Z0-9]/.test(nameStr)) return false;
+  
+  // Check if other fields are also completely empty (dummy rows)
+  const contact = row['Contact Number'] ? row['Contact Number'].toString().trim() : '';
+  const email = row.Email ? row.Email.toString().trim() : '';
+  const service = row.Service ? row.Service.toString().trim() : '';
+  const desc = row.Description ? row.Description.toString().trim() : '';
+  
+  if (contact === '' && email === '' && service === '' && desc === '') {
+    return false;
+  }
+  return true;
 }

@@ -8,6 +8,12 @@
 // Replace the ID below with your active Google Spreadsheet ID if needed.
 const SPREADSHEET_ID = "1podni8jkJb1oRzuk4d5wYHXIyBmpWwUsTaMASsqaxHI";
 
+// CALLMEBOT WHATSAPP CONFIGURATION
+// Your WhatsApp phone number (must include country code, e.g. +919638312502)
+const WHATSAPP_PHONE = "+919638312502";
+// Default CallMeBot API key (can also be overridden using script properties)
+const CALLMEBOT_API_KEY = "3235650";
+
 /**
  * Serves the web application directly if hosted on Google Apps Script.
  * Also handles GET requests from external API clients.
@@ -96,6 +102,23 @@ function handleApiRequest(action, params) {
         const authenticated = authenticate(username, password);
         result = { success: true, authenticated: authenticated };
         break;
+      case 'setupDailyTrigger':
+        const triggerMsg = setupDailyTrigger();
+        result = { success: true, message: triggerMsg };
+        break;
+      case 'sendDailyReport':
+        const reportResult = sendDailyReport();
+        result = reportResult;
+        break;
+      case 'setCallMeBotApiKey':
+        const apiKey = params.apiKey;
+        if (apiKey) {
+          PropertiesService.getScriptProperties().setProperty('CALLMEBOT_API_KEY', apiKey.trim());
+          result = { success: true };
+        } else {
+          result = { success: false, error: "API Key is required" };
+        }
+        break;
       default:
         result = { success: false, error: `Action '${action}' not found` };
     }
@@ -139,7 +162,7 @@ function getDashboardSummary() {
     visitors.shift(); // Remove headers
   }
 
-  let totalBookings = bookings.length;
+  let totalBookings = 0;
   let totalVisitors = visitors.length;
 
   let newCount = 0;
@@ -147,8 +170,19 @@ function getDashboardSummary() {
   let completedCount = 0;
 
   bookings.forEach(b => {
-    let status = b[7];
-    if (status == "New") newCount++;
+    let name = b[1] ? b[1].toString().trim() : '';
+    if (!name || !/[a-zA-Z0-9]/.test(name)) return; // Skip empty/dummy rows
+    
+    // Skip if contact details and service/description are all empty too
+    let contact = b[2] ? b[2].toString().trim() : '';
+    let email = b[3] ? b[3].toString().trim() : '';
+    let service = b[4] ? b[4].toString().trim() : '';
+    let desc = b[5] ? b[5].toString().trim() : '';
+    if (contact === '' && email === '' && service === '' && desc === '') return;
+
+    totalBookings++;
+    let status = b[7] ? b[7].toString().trim() : 'New';
+    if (status == "New" || !status) newCount++;
     if (status == "In Progress" || status == "Contacted") progressCount++;
     if (status == "Completed") completedCount++;
   });
@@ -186,7 +220,23 @@ function getBookings() {
       obj.Timestamp = obj.Timestamp.toISOString();
     }
     return obj;
-  }).filter(obj => obj.Name && obj.Name.toString().trim() !== "");
+  }).filter(obj => {
+    if (!obj.Name) return false;
+    const nameStr = obj.Name.toString().trim();
+    // Must contain at least one alphanumeric character
+    if (!/[a-zA-Z0-9]/.test(nameStr)) return false;
+    
+    // Check if other fields are also completely empty (dummy rows)
+    const contact = obj['Contact Number'] ? obj['Contact Number'].toString().trim() : '';
+    const email = obj.Email ? obj.Email.toString().trim() : '';
+    const service = obj.Service ? obj.Service.toString().trim() : '';
+    const desc = obj.Description ? obj.Description.toString().trim() : '';
+    
+    if (contact === '' && email === '' && service === '' && desc === '') {
+      return false;
+    }
+    return true;
+  });
 }
 
 function addBooking(booking) {
@@ -284,4 +334,178 @@ function getServices() {
     { name: "Data Storage & Maintenance", price: "₹500 - ₹1000", description: "Secure, organised storage for all employee records." },
     { name: "Employee Portal / Google Sheet Based Portal", price: "₹1000 - ₹2000", description: "Custom employee management portal built on Google Sheets with automation for HR operations." }
   ];
+}
+
+// ---------- WhatsApp Daily Report Automation ----------
+
+/**
+ * Sends a daily status report to the user's WhatsApp via CallMeBot API.
+ */
+function sendDailyReport() {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const bookingsSheet = ss.getSheetByName("Bookings");
+    const visitorsSheet = ss.getSheetByName("Visitors");
+    
+    let bookings = [];
+    let visitors = [];
+    
+    if (bookingsSheet) {
+      bookings = bookingsSheet.getDataRange().getValues();
+      bookings.shift(); // Remove header row
+    }
+    
+    if (visitorsSheet) {
+      visitors = visitorsSheet.getDataRange().getValues();
+      visitors.shift(); // Remove header row
+    }
+    
+    const today = new Date();
+    const todayStr = Utilities.formatDate(today, "GMT+5:30", "yyyy-MM-dd");
+    
+    // Filter bookings and calculate metrics
+    let totalBookings = 0;
+    let newCount = 0;
+    let progressCount = 0;
+    let completedCount = 0;
+    
+    let bookingsToday = [];
+    let bookingsTodayCount = 0;
+    
+    bookings.forEach(b => {
+      let name = b[1] ? b[1].toString().trim() : '';
+      if (!name || !/[a-zA-Z0-9]/.test(name)) return; // Skip dummy entries
+      
+      let contact = b[2] ? b[2].toString().trim() : '';
+      let email = b[3] ? b[3].toString().trim() : '';
+      let service = b[4] ? b[4].toString().trim() : '';
+      let desc = b[5] ? b[5].toString().trim() : '';
+      if (contact === '' && email === '' && service === '' && desc === '') return;
+      
+      totalBookings++;
+      let status = b[7] ? b[7].toString().trim() : 'New';
+      if (status === "New") newCount++;
+      if (status === "In Progress" || status === "Contacted") progressCount++;
+      if (status === "Completed") completedCount++;
+      
+      // Check if this booking was created today (IST)
+      if (b[0] instanceof Date) {
+        const bookingDateStr = Utilities.formatDate(b[0], "GMT+5:30", "yyyy-MM-dd");
+        if (bookingDateStr === todayStr) {
+          bookingsTodayCount++;
+          bookingsToday.push({
+            name: name,
+            service: service,
+            contact: contact
+          });
+        }
+      }
+    });
+    
+    // Count visitors today (IST)
+    let visitorsTodayCount = 0;
+    visitors.forEach(v => {
+      if (v[0] instanceof Date) {
+        const visitDateStr = Utilities.formatDate(v[0], "GMT+5:30", "yyyy-MM-dd");
+        if (visitDateStr === todayStr) {
+          visitorsTodayCount++;
+        }
+      }
+    });
+    
+    // Format the date nicely for report
+    const dateFormatted = Utilities.formatDate(today, "GMT+5:30", "dd MMM yyyy, hh:mm a");
+    
+    // Build the WhatsApp message
+    let message = `📊 *TRUSTERA DAILY REPORT* 📊\n` +
+                  `*Date:* ${dateFormatted} (IST)\n\n` +
+                  `📈 *Today's Activity:* \n` +
+                  `• Website Visitors: ${visitorsTodayCount}\n` +
+                  `• New Inquiries: ${bookingsTodayCount}\n\n`;
+                  
+    if (bookingsTodayCount > 0) {
+      message += `📝 *Today's New Inquiries:* \n`;
+      bookingsToday.forEach((b, idx) => {
+        message += `${idx + 1}. *${b.name}*\n` +
+                   `   Service: ${b.service || 'N/A'}\n` +
+                   `   Contact: ${b.contact || 'N/A'}\n`;
+      });
+      message += `\n`;
+    }
+    
+    message += `💼 *Overall Bookings Status:* \n` +
+               `• New: ${newCount}\n` +
+               `• In Progress: ${progressCount}\n` +
+               `• Completed: ${completedCount}\n` +
+               `• Total Database: ${totalBookings}\n\n` +
+               `Generated automatically by Trustera Backend.`;
+               
+    // Send the WhatsApp report
+    return sendWhatsAppMessage(WHATSAPP_PHONE, message);
+    
+  } catch (error) {
+    Logger.log("Error sending daily report: " + error.toString());
+    return { success: false, error: error.toString() };
+  }
+}
+
+/**
+ * Sends a message via CallMeBot WhatsApp API.
+ */
+function sendWhatsAppMessage(phone, message) {
+  try {
+    const apikey = PropertiesService.getScriptProperties().getProperty('CALLMEBOT_API_KEY') || CALLMEBOT_API_KEY;
+    
+    if (!apikey || apikey === "3235650" || apikey === "") {
+      Logger.log("CallMeBot API Key is default or not configured.");
+      return { success: false, error: "CallMeBot API Key not configured. Please set CALLMEBOT_API_KEY in script properties." };
+    }
+    
+    let cleanedPhone = phone.replace(/[^0-9]/g, "");
+    if (cleanedPhone.length === 10) {
+      cleanedPhone = "91" + cleanedPhone; // Default to India country code
+    }
+    
+    const url = "https://api.callmebot.com/whatsapp.php?phone=" + cleanedPhone + 
+                "&text=" + encodeURIComponent(message) + 
+                "&apikey=" + apikey;
+                
+    const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    const responseCode = response.getResponseCode();
+    const content = response.getContentText();
+    
+    if (responseCode === 200) {
+      Logger.log("WhatsApp message API status: OK");
+      return { success: true, response: content };
+    } else {
+      Logger.log("CallMeBot error: " + content);
+      return { success: false, error: content, code: responseCode };
+    }
+  } catch (error) {
+    Logger.log("HTTP exception during WhatsApp send: " + error.toString());
+    return { success: false, error: error.toString() };
+  }
+}
+
+/**
+ * Sets up a time-driven trigger to run sendDailyReport daily at 12:00 PM (IST).
+ */
+function setupDailyTrigger() {
+  const triggers = ScriptApp.getProjectTriggers();
+  for (let i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'sendDailyReport') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  
+  ScriptApp.newTrigger('sendDailyReport')
+    .timeBased()
+    .everyDays(1)
+    .atHour(12)
+    .nearMinute(0)
+    .inTimezone("Asia/Kolkata")
+    .create();
+    
+  Logger.log("Scheduled daily report trigger for 12:00 PM IST.");
+  return "Scheduled daily report trigger for 12:00 PM IST.";
 }

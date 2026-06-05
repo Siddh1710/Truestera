@@ -433,20 +433,40 @@
 
   <!-- ================= API CONFIGURATION MODAL ================= -->
   <div id="api-config-modal" class="modal-backdrop">
-    <div class="modal-card glass-card animate-zoom" style="max-width: 450px;">
+    <div class="modal-card glass-card animate-zoom" style="max-width: 480px; max-height: 90vh; overflow-y: auto;">
       <button class="modal-close" onclick="closeApiConfigModal()">&times;</button>
       <div class="modal-header">
-        <h2>API Link Connection</h2>
-        <p>Link this site to your Google Apps Script Web App for databases.</p>
+        <h2>System & API Settings</h2>
+        <p>Manage database connections and automated reports.</p>
       </div>
       <div class="api-setup-body">
-        <p class="info-alert"><i class="fas fa-info-circle"></i> Connect to your Google Spreadsheet database by pasting your Web App Deployment URL below.</p>
-        <div class="form-group">
-          <label for="api-url-input">Google Web App URL</label>
+        <!-- Section 1: Spreadsheet Database -->
+        <h3 style="margin-top: 15px; margin-bottom: 8px; font-size: 1.1rem; color: var(--accent-blue);"><i class="fas fa-database"></i> Database Connection</h3>
+        <p class="info-alert" style="font-size: 0.8rem; padding: 8px 12px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Connect to your Google Spreadsheet database by pasting your Web App Deployment URL below.</p>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="api-url-input" style="font-size: 0.85rem; font-weight: 600; color: #4b5563;">Google Web App URL</label>
           <input type="text" id="api-url-input" class="classic-input" placeholder="https://script.google.com/macros/s/.../exec">
         </div>
         <button class="btn-primary btn-full mt-10" onclick="saveApiUrl()"><i class="fas fa-save"></i> Save & Connect Database</button>
-        <button class="btn-text-link btn-full mt-10" onclick="resetApiUrlToMock()"><i class="fas fa-undo"></i> Reset to Demo/Mock Mode</button>
+        <button class="btn-text-link btn-full mt-10" style="font-size: 0.8rem;" onclick="resetApiUrlToMock()"><i class="fas fa-undo"></i> Reset to Demo/Mock Mode</button>
+        
+        <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 20px 0;">
+        
+        <!-- Section 2: WhatsApp Automation -->
+        <h3 style="margin-bottom: 8px; font-size: 1.1rem; color: var(--accent-cyan);"><i class="fab fa-whatsapp"></i> WhatsApp Status Reports</h3>
+        <p class="info-alert" style="font-size: 0.8rem; padding: 8px 12px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Daily reports will be sent to <strong>+91 9638312502</strong>. Register with CallMeBot to get your API Key.</p>
+        
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="api-whatsapp-key" style="font-size: 0.85rem; font-weight: 600; color: #4b5563;">CallMeBot API Key</label>
+          <input type="text" id="api-whatsapp-key" class="classic-input" placeholder="Enter CallMeBot API Key (e.g. 3235650)">
+        </div>
+        
+        <button class="btn-primary btn-full mt-10" onclick="saveWhatsAppKey()" style="background: linear-gradient(135deg, #25D366, #128C7E); border-color: rgba(37, 211, 102, 0.4); color: white;"><i class="fas fa-key"></i> Save WhatsApp Key</button>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+          <button class="btn-secondary btn-sm" onclick="setupDailyWhatsappTrigger()" style="padding: 10px 5px; font-size: 0.78rem; text-align: center;"><i class="fas fa-calendar-alt"></i> Schedule 12:00 PM Trigger</button>
+          <button class="btn-secondary btn-sm" onclick="sendTestWhatsappReport()" style="padding: 10px 5px; font-size: 0.78rem; text-align: center;"><i class="fas fa-paper-plane"></i> Send Test Report Now</button>
+        </div>
       </div>
     </div>
   </div>
